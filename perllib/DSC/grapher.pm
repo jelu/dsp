@@ -139,6 +139,13 @@ sub cgi {
 		$self->{ARGS}->{yaxis} = $untaint->extract(-as_printable => 'yaxis') if defined $self->{cgi}->param('yaxis');
 		$self->{ARGS}->{key} = $untaint->extract(-as_printable => 'key') if defined $self->{cgi}->param('key');
 		$self->{ARGS}->{content} = $untaint->extract(-as_printable => 'content') || 'html';
+
+        foreach (qw(server node plot yaxis key content)) {
+            unless ( $self->{ARGS}->{ $_ } =~ /^[a-zA-Z0-9_\-\.]+$/o ) {
+                $self->error('Something went wrong...');
+            }
+        }
+
 		$self->{use_data_uri} = defined $self->{cgi}->param('x') ? 1 : 0;
 		$self->process_args;
 	}
