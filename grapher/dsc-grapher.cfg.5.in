@@ -1,0 +1,186 @@
+.\" Copyright (c) 2016, OARC, Inc.
+.\" Copyright (c) 2007, The Measurement Factory, Inc.
+.\" Copyright (c) 2007, Internet Systems Consortium, Inc.
+.\" All rights reserved.
+.\"
+.\" Redistribution and use in source and binary forms, with or without
+.\" modification, are permitted provided that the following conditions
+.\" are met:
+.\"
+.\" 1. Redistributions of source code must retain the above copyright
+.\"    notice, this list of conditions and the following disclaimer.
+.\"
+.\" 2. Redistributions in binary form must reproduce the above copyright
+.\"    notice, this list of conditions and the following disclaimer in
+.\"    the documentation and/or other materials provided with the
+.\"    distribution.
+.\"
+.\" 3. Neither the name of the copyright holder nor the names of its
+.\"    contributors may be used to endorse or promote products derived
+.\"    from this software without specific prior written permission.
+.\"
+.\" THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
+.\" "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
+.\" LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS
+.\" FOR A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE
+.\" COPYRIGHT HOLDER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT,
+.\" INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING,
+.\" BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES;
+.\" LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER
+.\" CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT
+.\" LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN
+.\" ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
+.\" POSSIBILITY OF SUCH DAMAGE.
+.\"
+.TH dsc-grapher.cfg 5 "@PACKAGE_VERSION@" "DNS Statistics Presenter"
+.SH NAME
+dsc-grapher.cfg \- Configuration for the DNS Statistics Presenter
+.SH DESCRIPTION
+The file
+.I dsc-grapher.cfg
+contains the configuration for the Presenter.
+Each line is a configuration option and may have arguments in the form
+.IR "option values" .
+Comment lines must have a hash sign (#) in the first column.
+.SH CONFIGURATION
+.TP
+\fBlocal_address\fR IP ;
+Specifies the DNS server's local IP address.  It is used to
+determine the direction of an IP packet: sending, receiving,
+or other.  You may specify multiple local addresses by repeating
+the \fBlocal_address\fR line any number of times.
+
+The following three directives should always be set in
+the configuration file:
+
+\begin{description}
+\item[server]
+	This directive tells \path|dsc-grapher.pl| to list
+	the given server and its associated nodes in the
+	``Servers/Nodes'' section of its navigation menu.
+	You can repeat this directive for each server that
+	the Presenter has.
+\item[trace\_windows]
+	Specifies the ``Time Scale'' menu options for
+	trace-based plots.
+\item[accum\_windows]
+	Specifies the ``Time Scale'' menu options for
+	``cumulative'' plots, such as the Classification plot.
+\end{description}
+
+Note that the \path|dsc-grapher.cfg| only affects what
+may appear in the navigation window.  It does NOT prevent users
+from entering other values in the URL parameters.  For example,
+if you have data for a server/node in your
+\path|/usr/local/dsc/data/| directory that is not listed in
+\path|dsc-grapher.cfg|, a user may still be able to view that
+data by manually setting the URL query parameters.
+
+The configuration file accepts a number of optional directives
+as well.  You may set these if you like, but they are not
+required:
+
+\begin{description}
+\item[timezone]
+	Sets the time zone for dates and times displayed in the
+	graphs.
+	You can use this if you want to override the system
+	time zone.
+	The value for this directive should be the name
+	of a timezone entry in your system database (usually found
+	in {\path|/usr/share/zoneinfo|}.
+	For example, if your system time zone is set
+	to UTC but you want the times displayed for the
+	London timezone, you can set this directive to
+	{\tt Europe/London\/}.
+\item[domain\_list]
+	This directive, along with {\em valid\_domains\/}, tell the
+	presenter which domains a nameserver is authoritative for.
+	That information is used in the TLDs subgraphs to differentiate
+	requests for ``valid'' and ``invalid'' domains.
+
+	The {\em domain\_list\/} creates a named list of domains.
+	The first token is a name for the list, and the remaining
+	tokens are domain names.  The directive may be repeated with
+	the same list name, as shown in the above example.
+\item[valid\_domains]
+	This directive glues servers and domain\_lists together.  The
+	first token is the name of a {\em server\/} and the second token is
+	the name of a {\em domain\_list\/}.
+\item[embargo]
+	The {\em embargo\/} directive may be used to delay the
+	availability of data via the presenter.  For example, you
+	may have one instance of {\em dsc-grapher.pl\/} for internal
+	use only (password protected, etc).  You may also have a
+	second instance for third-parties where data is delayed by
+	some amount of time, such as hours, days, or weeks.  The value
+	of the {\em embargo\/} directive is the number of seconds which
+	data availability should be delayed.  For example, if you set
+	it to 604800, then viewers will not be able to see any data
+	less than one week old.
+\item[anonymize\_ip]
+	When the {\em anonymize\_ip\/} directive is given, IP addresses
+	in the display will be anonymized.  The anonymization algorithm
+	is currently hard-coded and designed only for IPv4 addresses.
+	It masks off the lower 24 bits and leaves only the first octet
+	in place.
+\item[hide\_nodes]
+	When the {\em hide\_nodes\/} directive is given, the presenter
+	will not display the list node names underneath the current
+	server.  This might be useful if you have a number of nodes
+	but only want viewers to see the server as a whole, without
+	exposing the particular nodes in the cluster.  Note, however,
+	that if someone already knows the name of a node they can
+	hand-craft query terms in the URL to display the data for
+	only that node.  In other words, the {\em hide\_nodes\/}
+	only provides ``security through obscurity.''
+\end{description}
+
+
+
+.SH EXAMPLE
+.nf
+server f-root pao1 sfo2
+server isc senna+piquet
+server tmf hq sc lgh
+trace_windows 1hour 4hour 1day 1week 1month
+accum_windows 1day 2days 3days 1week
+timezone Asia/Tokyo
+domain_list isc_tlds br nl ca cz il pt cl
+domain_list isc_tlds sk ph hr ae bg is si za
+valid_domains isc isc_tlds
+.fi
+.SH FILES
+@etcdir@/dsc-grapher.cfg
+.br
+@etcdir@/dsc-grapher.cfg.sample
+.SH "SEE ALSO"
+dsc(1)
+.SH AUTHORS
+Jerry Lundström, DNS-OARC
+.br
+Duane Wessels, Measurement Factory / Verisign
+.br
+Ken Keys, Cooperative Association for Internet Data Analysis
+.br
+Sebastian Castro, New Zealand Registry Services
+.LP
+Maintained by DNS-OARC
+.LP
+.RS
+.I https://www.dns-oarc.net/tools/dsc
+.RE
+.LP
+.SH BUGS
+For issues and feature requests please use:
+.LP
+.RS
+\fI@PACKAGE_URL@\fP
+.RE
+.LP
+For question and help please use:
+.LP
+.RS
+\fI@PACKAGE_BUGREPORT@\fP
+.RE
+.LP

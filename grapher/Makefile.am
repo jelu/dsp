@@ -26,9 +26,12 @@ dist_html_DATA = plot.page \
 
 script_SCRIPTS += update-dat-file-locations.sh
 
+man5_MANS = dsc-grapher.cfg.5
+
 EXTRA_DIST = update-dat-file-locations.sh.in \
     dsc-grapher-cli.pl.in \
-    dsc-grapher.pl.in
+    dsc-grapher.pl.in \
+    dsc-grapher.cfg.5.in
 
 update-dat-file-locations.sh: update-dat-file-locations.sh.in Makefile
 	sed -e 's,[@]DSC_DATA_DIR[@],$(DSC_DATA_DIR),g' \
@@ -47,3 +50,10 @@ dsc-grapher.pl: dsc-grapher.pl.in Makefile
         -e 's,[@]DSP_CACHE_DIR[@],$(DSP_CACHE_DIR),g' \
         -e 's,[@]DSP_HTML_DIR[@],$(DSP_HTML_DIR),g' \
         < $(srcdir)/dsc-grapher.pl.in > dsc-grapher.pl
+
+dsc-grapher.cfg.5: dsc-grapher.cfg.5.in Makefile
+	sed -e 's,[@]PACKAGE_VERSION[@],$(PACKAGE_VERSION),g' \
+        -e 's,[@]PACKAGE_URL[@],$(PACKAGE_URL),g' \
+        -e 's,[@]PACKAGE_BUGREPORT[@],$(PACKAGE_BUGREPORT),g' \
+        -e 's,[@]etcdir[@],$(etcdir),g' \
+        < $(srcdir)/dsc-grapher.cfg.5.in > dsc-grapher.cfg.5
